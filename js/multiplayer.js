@@ -1,8 +1,14 @@
 let playerName;
 let gameEnded = false;
 let opponentScore = 0;
+let currentRoom = null;
 
 function setupMultiplayerListeners(socket, playerName) {
+  socket.on("joinedRoom", (roomData) => {
+    console.log(`Joined room: ${roomData.roomId}`);
+    currentRoom = roomData.roomId;
+  });
+
   socket.on("playerConnected", (players) => {
     console.log("Players:", players);
     if (players.length === 2) {
@@ -37,10 +43,10 @@ function setupMultiplayerListeners(socket, playerName) {
     }
   });
 
-  socket.on("gameOver", (losingPlayerName) => {
-    if (!gameEnded) {
+  socket.on("gameOver", (data) => {
+    if (!gameEnded && data.roomId === currentRoom) {
       gameEnded = true;
-      if (losingPlayerName !== playerName) {
+      if (data.loser !== playerName) {
         showGameOverAlert('You won!', 'Congratulations!', 'success');
       } else {
         showGameOverAlert('You lost!', 'Game Over', 'error');
@@ -49,17 +55,21 @@ function setupMultiplayerListeners(socket, playerName) {
   });
 
   socket.on("disconnect", () => {
-    socket.emit("playerDisconnected", playerName);
+    socket.emit("playerDisconnected", { playerName, roomId: currentRoom });
   });
 
-  socket.on("playerDisconnected", (disconnectedPlayerName) => {
-    if (!gameEnded) {
+  socket.on("playerDisconnected", (data) => {
+    if (!gameEnded && data.roomId === currentRoom) {
       gameEnded = true;
       gameOver();
-      if (disconnectedPlayerName !== playerName) {
+      if (data.disconnectedPlayerName !== playerName) {
         showGameOverAlert('You won!', 'The other player has disconnected.', 'success');
       }
     }
+  });
+
+  socket.on("roomClosed", () => {
+    showGameOverAlert('Room Closed', 'The game room has been closed.', 'info');
   });
 }
 
@@ -70,13 +80,12 @@ function showGameOverAlert(title, text, icon) {
       ${text}<br><br>
       Your score: ${score}<br>
       Opponent's score: ${opponentScore}
-
     `,
     icon: icon,
     confirmButtonText: 'Play Again'
   }).then((result) => {
     if (result.isConfirmed) {
-      window.location.reload();
+      startMultiplayer();
     }
   });
 }
@@ -84,7 +93,6 @@ function showGameOverAlert(title, text, icon) {
 function startMultiplayer() {
   document.getElementById("multiplayerBtn").style.display = "none";
   document.getElementById("singleplayerBtn").style.display = "none";
-
   Swal.fire({
     title: 'Enter your name',
     input: 'text',
@@ -99,7 +107,7 @@ function startMultiplayer() {
     if (result.isConfirmed) {
       playerName = result.value;
       socket = io();
-      socket.emit("join", playerName);
+      socket.emit("joinRoom", playerName);
       showSearchingState();
       setupMultiplayerListeners(socket, playerName);
       loop();
