@@ -6,7 +6,17 @@ document.getElementById("temp").addEventListener("click", showPlayWithBothSugges
 
 
 function startBotGame(suggestion) {
-  // var initTime = new Date().getTime();
+  const queryParams = {
+    userID: 'botValaURL',
+};
+const urlParams = new URLSearchParams(queryParams);
+    const newUrl = `${window.location.href}?${urlParams.toString()}`;
+    history.pushState(null, null, newUrl);
+
+
+    alert(urlParams.get('userID')); // Output: value1
+    // Output: value1
+
   isPlay = true;
   isPlayWithBot = true;
   start.play();
@@ -24,7 +34,8 @@ function startBotGame(suggestion) {
 }
 
 function showPlayWithBothSuggestion() {
-  let loadingMsg = select("#loadingMsg");
+
+      let loadingMsg = select("#loadingMsg");
 
   
   if (loadingMsg) {
