@@ -333,7 +333,8 @@ function game() {
       });
 
       if (!isSpectating) {
-        botscore = 0;
+        const botScores = [3, 5, 8, 11, 7];
+        botscore = botScores[Math.floor(Math.random() * botScores.length)];
         botlives = 3;
         botpoints = 0;
 
