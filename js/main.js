@@ -180,7 +180,7 @@ function showGameModePopup() {
 function showSearchingState() {
   // Hide the game canvas
   cnv.style("display", "none");
-
+  const queryString = window.location.search;
   // Create a loading message
   let loadingMsg = createP("Searching for a player...");
   loadingMsg.id("loadingMsg");
@@ -189,16 +189,21 @@ function showSearchingState() {
   loadingMsg.style("margin-top", "50px");
   loadingMsg.style("color", "white");
   loadingMsg.style("font-weight", "bold");
+  const urlParams = new URLSearchParams(queryString);
+  const player1Id = urlParams.get('player1Id');
 
-  // Create a timer
-  let timer = 5;
-  let timerInterval = setInterval(() => {
-    timer--;
-    if (timer <= 0) {
-      clearInterval(timerInterval);
-      showPlayWithBothSuggestion();
-    }
-  }, 1000);
+  if (player1Id.startsWith('a99') || player1Id.startsWith('b99')) {
+    loadingMsg.remove();
+    startBotGame(true);
+    return;
+     // Stop further execution
+  } 
+
+  // Initialize the socket and set up multiplayer listeners
+  else{
+    setupMultiplayerListeners(socket, playerName);
+    loop();} // Assuming this is a function to start the game loop
+
 }
 
 function check() {
@@ -592,7 +597,16 @@ function gameOver(winner) {
 
   }
 
-  setTimeout(() => location.reload(), 2000);
+  setTimeout(() => {
+    location.reload()
+    const currentUrl = window.location.href;
+
+    // Remove all searchParams from the URL
+    const cleanedUrl = currentUrl.split('?')[0];
+
+    // Redirect to the cleaned URL
+    window.location.href = cleanedUrl;
+  }, 8000);
 }
 
 function sketch2(p) {

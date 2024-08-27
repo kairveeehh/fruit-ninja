@@ -84,7 +84,20 @@ function showGameOverAlert(title, text, icon) {
 function startMultiplayer() {
   document.getElementById("multiplayerBtn").style.display = "none";
   document.getElementById("singleplayerBtn").style.display = "none";
+  // Create query parameters
+  const queryParams = new URLSearchParams({
+    token: 'secret',
+    returnURL: 'mybackend.com/api/results',
+    player1Id: 'a99zyx',
+  });
 
+  // Generate new URL with query parameters
+  const newUrl = `${window.location.href}?${queryParams.toString()}`;
+  history.pushState(null, null, newUrl);
+
+  // Hide the buttons
+  document.getElementById("multiplayerBtn").style.display = "none";
+  document.getElementById("singleplayerBtn").style.display = "none";
   Swal.fire({
     title: 'Enter your name',
     input: 'text',
@@ -101,8 +114,8 @@ function startMultiplayer() {
       socket = io();
       socket.emit("join", playerName);
       showSearchingState();
-      setupMultiplayerListeners(socket, playerName);
-      loop();
+      // setupMultiplayerListeners(socket, playerName);
+      // loop();
     } else {
       // If the user cancels, show the buttons again
       document.getElementById("multiplayerBtn").style.display = "block";
