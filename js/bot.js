@@ -1,6 +1,6 @@
 let bot;
 var botscore = 0;
-var botlives = 3;
+var botlives = 25;
 var botpoints = 0;
 document.getElementById("temp").addEventListener("click", showPlayWithBothSuggestion());
 

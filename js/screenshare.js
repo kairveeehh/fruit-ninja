@@ -30,7 +30,7 @@ const displayMediaOptions = {
   audio: false,
 };
 
-const signalingServerUrl = "ws://localhost:8080";
+const signalingServerUrl = "wss://fruit-ninja-s04q.onrender.com";
 const signalingSocket = new WebSocket(signalingServerUrl);
 
 signalingSocket.onopen = () => {

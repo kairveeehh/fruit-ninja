@@ -42,7 +42,7 @@ let opponentState = {
   swordY: 0,
   fruits: [],
   score: 0,
-  lives: 6,
+  lives: 26,
 };
 let socket;
 
@@ -88,7 +88,7 @@ function setup() {
   sword = new Sword(color("#FFFFFF"));
   frameRate(60);
   score = 0;
-  lives = 3;
+  lives = 26;
   showGameModePopup(); // Show the popup when the game starts
 
   // Create singleplayer button
@@ -248,6 +248,7 @@ function game() {
       }
       if (lives < 1) {
         console.log(playerName, "Player lost the game");
+       
         if (isMultiplayer) socket.emit("gameOver", playerName);
         if (isPlayWithBot) gameOver("bot");
         gameOver();
@@ -419,7 +420,7 @@ function game() {
       if (!isSpectating) {
         const botScores = [3, 5, 8, 11, 7];
         botscore = botScores[Math.floor(Math.random() * botScores.length)];
-        botlives = 3;
+        botlives = 25;
         botpoints = 0;
 
         // Randomly decrease lives, increase points, and scores
@@ -667,7 +668,7 @@ function gameOver(winner) {
 
     if (winner === "bot") {
       title = "Game Over!";
-      text = "Bot Won the game";
+      text = "Opponent Won the game";
       icon = "info";
     } else if (winner === "player") {
       title = "Congratulations!";
@@ -680,7 +681,7 @@ function gameOver(winner) {
       html: `
         ${text}<br><br>
         Your score: ${score}<br>
-        Bot's score: ${botscore}
+        Opponent's Score: ${botscore}
       `,
       icon: icon,
       confirmButtonText: "OK",
@@ -718,7 +719,7 @@ function gameOver(winner) {
 function resetGameState() {
   // Reset all game variables here
   score = 0;
-  lives = 3;
+  lives = 25;
   fruit = [];
   // ... reset any other necessary variables
 
