@@ -31,11 +31,13 @@ function gameLoop(roomId) {
     if (opponentId) {
       io.to(opponentId).emit("updateOpponentState", {
         swordX: gameState.swordX[socketId],
-        swordY: gameState.swordY[socketId],
-        fruits: gameState.fruits[socketId],
-        score: gameState.scores[socketId],
-        lives: gameState.lives[socketId],
+  swordY: gameState.swordY[socketId],
+  fruits: gameState.fruits[socketId],
+  score: gameState.scores[socketId],
+  lives: gameState.lives[socketId],
       });
+
+      console.log('Oppoennt score is',gameState.scores[socketId])
     }
   });
 }
@@ -129,6 +131,14 @@ io.on("connection", (socket) => {
         roomId: currentRoom,
         loser: data.loser
       });
+    }
+  });
+  socket.on("updateScore", (data) => {
+    if (!currentRoom) return;
+    const gameState = rooms.get(currentRoom);
+    if (gameState) {
+      gameState.scores[socket.id] = data.score;
+      console.log(`Updated score for ${socket.id}: ${data.score}`);
     }
   });
 

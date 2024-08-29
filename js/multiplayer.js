@@ -1,6 +1,6 @@
 let playerName;
 let gameEnded = false;
-var opponentScore = 0;
+let opponentScore = 0;
 let currentRoom = null;
 
 
@@ -64,6 +64,8 @@ function setupMultiplayerListeners(socket, playerName) {
   });
 
   socket.on("updateOpponentState", (data) => {
+    console.error('Opponent state is',data)
+
     updateOpponentState(data);
   });
 
@@ -75,6 +77,7 @@ function setupMultiplayerListeners(socket, playerName) {
     for (let player in scores) {
       if (player !== playerName) {
         opponentScore = scores[player];
+        
         break;
       }
     }
@@ -111,6 +114,12 @@ function setupMultiplayerListeners(socket, playerName) {
     showGameOverAlert('Room Closed', 'The game room has been closed.', 'info');
   });
 }
+
+function updateScore(newScore) {
+  score = newScore;
+  socket.emit("updateScore", { score: newScore });
+}
+
 
 function showGameOverAlert(title, text, icon) {
   Swal.fire({

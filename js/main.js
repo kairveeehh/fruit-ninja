@@ -287,6 +287,7 @@ function game() {
   }
 
   if (isMultiplayer) {
+    socket.emit("updateScore", { score: score });
     socket.emit("updateOpponentData", {
       score: score,
       lives: lives,
