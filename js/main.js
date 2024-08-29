@@ -42,7 +42,7 @@ let opponentState = {
   swordY: 0,
   fruits: [],
   score: 0,
-  lives: 6,
+  lives: 26,
 };
 let socket;
 
@@ -88,45 +88,47 @@ function setup() {
   sword = new Sword(color("#FFFFFF"));
   frameRate(60);
   score = 0;
-  lives = 3;
+  lives = 26;
   showGameModePopup(); // Show the popup when the game starts
 
   // Create singleplayer button
   let singleplayerBtn = createButton("");
   singleplayerBtn.id("singleplayerBtn");
+
   singleplayerBtn.style("background", "url(images/Start_icon.png) no-repeat center");
+
   singleplayerBtn.style("background-size", "contain");
   singleplayerBtn.style("border", "none");
   singleplayerBtn.style("padding", "0");
   singleplayerBtn.style("cursor", "pointer");
   singleplayerBtn.mousePressed(startSingleplayer);
-  
+
   // Responsive positioning and sizing
   singleplayerBtn.style("position", "fixed");
   singleplayerBtn.style("right", "10px");
   singleplayerBtn.style("bottom", "20px");
-  
+
   // Base size for most screens
   singleplayerBtn.style("width", "clamp(100px, 20vw, 400px)");
   singleplayerBtn.style("height", "clamp(100px, 20vw, 400px)");
-  
-  // Adjust size for larger screens
 
-  
+  // Adjust size for larger screens
 
   // Create multiplayer button
   let multiplayerBtn = createButton("");
   multiplayerBtn.id("multiplayerBtn");
   // multiplayerBtn.position(300, 150);
   // multiplayerBtn.size(500, 500);
-multiplayerBtn.style("background", "url(images/Multiplayer_Icon.png) no-repeat center");
-multiplayerBtn.style("background-size", "contain");
-multiplayerBtn.style("background-size", "contain");
+  multiplayerBtn.style(
+    "background",
+    "url(images/Multiplayer_Icon.png) no-repeat center"
+  );
+  multiplayerBtn.style("background-size", "contain");
+  multiplayerBtn.style("background-size", "contain");
   multiplayerBtn.style("border", "none");
   multiplayerBtn.style("padding", "0");
   multiplayerBtn.style("cursor", "pointer");
 
-  
   // Responsive positioning and sizing
   multiplayerBtn.style("position", "fixed");
   multiplayerBtn.style("left", "10px");
@@ -181,6 +183,7 @@ function showSearchingState() {
   // Hide the game canvas
   cnv.style("display", "none");
   const queryString = window.location.search;
+
   // Create a loading message
   let loadingMsg = createP("Searching for a player...");
   loadingMsg.id("loadingMsg");
@@ -189,10 +192,12 @@ function showSearchingState() {
   loadingMsg.style("margin-top", "50px");
   loadingMsg.style("color", "white");
   loadingMsg.style("font-weight", "bold");
+
   const urlParams = new URLSearchParams(queryString);
   const player1Id = urlParams.get('player1Id');
 
   if (player1Id.startsWith('a99') || player1Id.startsWith('b99')) {
+    // alert()
     loadingMsg.remove();
     startBotGame(true);
     return;
@@ -202,8 +207,13 @@ function showSearchingState() {
   // Initialize the socket and set up multiplayer listeners
   else{
     setupMultiplayerListeners(socket, playerName);
-    loop();} // Assuming this is a function to start the game loop
+    loop();} 
 
+  // Create a timer
+
+  // let timerInterval = setTimeout(() => {
+  //     showPlayWithBothSuggestion();
+  // }, 5000);
 }
 
 function check() {
@@ -238,6 +248,7 @@ function game() {
       }
       if (lives < 1) {
         console.log(playerName, "Player lost the game");
+       
         if (isMultiplayer) socket.emit("gameOver", playerName);
         if (isPlayWithBot) gameOver("bot");
         gameOver();
@@ -289,9 +300,79 @@ function game() {
         sliced: f.sliced,
       })),
     });
+    if(isMultiplayer){
+      let spectateBtn = document.getElementById("spectateBtn");
+      if (!spectateBtn) {
+        const spectateBtn = document.createElement("button");
+        spectateBtn.id = "spectateBtn";
+        spectateBtn.innerText = "Spectate";
+        spectateBtn.style.position = "absolute";
+        spectateBtn.style.top = "75px";
+        spectateBtn.style.marginTop = "40px";
+  
+        spectateBtn.style.right = "10px";
+  
+        // Style the button
+        spectateBtn.style.padding = "10px 20px";
+        spectateBtn.style.border = "2px solid #8B4513"; // Dark brown border to match the wooden background
+        spectateBtn.style.borderRadius = "15px"; // Rounded corners for a more polished look
+        spectateBtn.style.backgroundColor = "#FFA500"; // Bright orange color for a fruit-like appearance
+        spectateBtn.style.color = "#fff"; // White text for good contrast
+        spectateBtn.style.fontFamily =
+          "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"; // A clean and modern font
+        spectateBtn.style.fontSize = "16px";
+        spectateBtn.style.cursor = "pointer";
+        spectateBtn.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.3)"; // Subtle shadow for depth
+  
+        // Add a hover effect
+        spectateBtn.addEventListener("mouseover", () => {
+          spectateBtn.style.backgroundColor = "#FF8C00"; // Darker orange on hover
+        });
+  
+        spectateBtn.addEventListener("mouseout", () => {
+          spectateBtn.style.backgroundColor = "#FFA500"; // Revert to original color
+        });
+  
+        document.body.appendChild(spectateBtn);
+  
+        spectateBtn.addEventListener("click", () => {
+          isSpectating = !isSpectating;
+          if (isSpectating) {
+            spectateBtn.innerText = "Return";
+            document.getElementById("defaultCanvas0").style.border = "none";
+          } else {
+            spectateBtn.innerText = "Spectate";
+            document.getElementById("defaultCanvas0").style.border = "none";
+          }
+        });}
+
+
+        let remoteVideo = document.getElementById("remoteVideo");
+        if (!remoteVideo) {
+          remoteVideo = document.createElement("video");
+          remoteVideo.id = "remoteVideo";
+          remoteVideo.style.position = "absolute";
+          remoteVideo.style.bottom = "10px";
+          remoteVideo.style.right = "10px";
+          remoteVideo.style.width = "300px";
+          remoteVideo.style.height = "200px";
+          remoteVideo.style.border = "2px solid #8B4513";
+          remoteVideo.style.borderRadius = "15px";
+          remoteVideo.style.backgroundColor = "#000"; // Black background
+      
+          // Append video element to the body
+          document.body.appendChild(remoteVideo);
+        }
+
+
+
+    }
   }
   if (isPlayWithBot) {
     let spectateBtn = document.getElementById("spectateBtn");
+
+    // var finalTime = new Date().getTime();
+    // console.error(finalTime - initTime);
     if (!spectateBtn) {
       const spectateBtn = document.createElement("button");
       spectateBtn.id = "spectateBtn";
@@ -301,36 +382,35 @@ function game() {
       spectateBtn.style.marginTop = "40px";
 
       spectateBtn.style.right = "10px";
-      
+
       // Style the button
       spectateBtn.style.padding = "10px 20px";
       spectateBtn.style.border = "2px solid #8B4513"; // Dark brown border to match the wooden background
       spectateBtn.style.borderRadius = "15px"; // Rounded corners for a more polished look
       spectateBtn.style.backgroundColor = "#FFA500"; // Bright orange color for a fruit-like appearance
       spectateBtn.style.color = "#fff"; // White text for good contrast
-      spectateBtn.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"; // A clean and modern font
+      spectateBtn.style.fontFamily =
+        "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"; // A clean and modern font
       spectateBtn.style.fontSize = "16px";
       spectateBtn.style.cursor = "pointer";
       spectateBtn.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.3)"; // Subtle shadow for depth
-      
+
       // Add a hover effect
       spectateBtn.addEventListener("mouseover", () => {
         spectateBtn.style.backgroundColor = "#FF8C00"; // Darker orange on hover
       });
-      
+
       spectateBtn.addEventListener("mouseout", () => {
         spectateBtn.style.backgroundColor = "#FFA500"; // Revert to original color
       });
-      
-      document.body.appendChild(spectateBtn);
 
+      document.body.appendChild(spectateBtn);
 
       spectateBtn.addEventListener("click", () => {
         isSpectating = !isSpectating;
         if (isSpectating) {
           spectateBtn.innerText = "Return";
-          document.getElementById("defaultCanvas0").style.border =
-            "none";
+          document.getElementById("defaultCanvas0").style.border = "none";
         } else {
           spectateBtn.innerText = "Spectate";
           document.getElementById("defaultCanvas0").style.border = "none";
@@ -340,7 +420,7 @@ function game() {
       if (!isSpectating) {
         const botScores = [3, 5, 8, 11, 7];
         botscore = botScores[Math.floor(Math.random() * botScores.length)];
-        botlives = 3;
+        botlives = 25;
         botpoints = 0;
 
         // Randomly decrease lives, increase points, and scores
@@ -446,13 +526,14 @@ function drawBotPOV() {
       if (fruit[i].sliced && fruit[i].name == "boom") {
         boom.play();
         if (isPlayWithBot) gameOver("player");
-        if (isMultiplayer) socket.emit("gameOver", playerName);
-        gameOver();
+if (isMultiplayer) {
+          socket.emit("gameOver", { loser: playerName, roomId: currentRoom });
+        }        gameOver();
       }
       if (sword.checkSlice(fruit[i]) && fruit[i].name != "boom") {
         spliced.play();
         showSplash(fruit[i].name, fruit[i].x, fruit[i].y);
-        // botpoints++;
+        // botpoints++; FUCKS UP THE Points into 100's
         botscore++;
         fruit[i].update();
         fruit[i].draw();
@@ -467,6 +548,24 @@ function drawBotPOV() {
   botscore += botpoints;
   drawScore(botpoints);
   drawLives(botlives);
+
+
+  if (isMultiplayer) {
+    socket.emit("updateBotState", {
+      score: botscore,
+      lives: botlives,
+      swordX: botX,
+      swordY: botY,
+      fruits: fruit.map((f) => ({
+        name: f.name,
+        x: f.x,
+        y: f.y,
+        visible: f.visible,
+        sliced: f.sliced,
+      })),
+      roomId: currentRoom,
+    });
+  }
 }
 
 let splashTimer = 6000; // Adjust this value to change the display duration
@@ -538,9 +637,9 @@ function drawScore(score) {
   textSize(50);
   text(score, 50, 50);
 }
-function singlegameOver(score1, score2){
-  return max(score1,score2);
-  // TODO winning logic redfine 
+function singlegameOver(score1, score2) {
+  return max(score1, score2);
+  // TODO winning logic redfine
 }
 function gameOver(winner) {
   isPlay = false;
@@ -566,15 +665,15 @@ function gameOver(winner) {
 
   if (isPlayWithBot) {
     let title, text, icon;
-    
+
     if (winner === "bot") {
-      title = 'Game Over!';
-      text = 'Bot Won the game';
-      icon = 'info';
+      title = "Game Over!";
+      text = "Opponent Won the game";
+      icon = "info";
     } else if (winner === "player") {
-      title = 'Congratulations!';
-      text = 'You Won the game';
-      icon = 'success';
+      title = "Congratulations!";
+      text = "You Won the game";
+      icon = "success";
     }
 
     Swal.fire({
@@ -582,32 +681,61 @@ function gameOver(winner) {
       html: `
         ${text}<br><br>
         Your score: ${score}<br>
-        Bot's score: ${botscore}
+        Opponent's Score: ${botscore}
       `,
       icon: icon,
-      confirmButtonText: 'OK'
+      confirmButtonText: "OK",
     });
 
     isPlayWithBot = false;
   }
 
   lives = 0;
-  if (isMultiplayer) {socket.emit("gameOver", playerName);
-    opponentScore = opponentState.score
+  if (isMultiplayer) {
+    socket.emit("gameOver", { loser: playerName, roomId: currentRoom });
+    opponentScore = opponentState.score;
 
+    socket.emit("leaveRoom", { roomId: currentRoom });
   }
 
   setTimeout(() => {
-    location.reload()
-    const currentUrl = window.location.href;
+    if (isMultiplayer) {
+      // Instead of reloading, reset the game state and wait for a new opponent
+      resetGameState();
+      socket.emit("waitForOpponent");
+    } else {
+      location.reload();
+      const currentUrl = window.location.href;
 
     // Remove all searchParams from the URL
     const cleanedUrl = currentUrl.split('?')[0];
 
     // Redirect to the cleaned URL
     window.location.href = cleanedUrl;
-  }, 8000);
+    }
+  }, 2000);
 }
+
+function resetGameState() {
+  // Reset all game variables here
+  score = 0;
+  lives = 25;
+  fruit = [];
+  // ... reset any other necessary variables
+
+  // Clear the canvas
+  clear();
+  background(bg);
+
+  // Display a "Waiting for opponent" message
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  fill(255);
+  text("Waiting for opponent...", width/2, height/2);
+}
+
+
+
 
 function sketch2(p) {
   let prevX = null;
