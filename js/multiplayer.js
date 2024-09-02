@@ -6,20 +6,15 @@ let currentRoom = null;
 
 function setupMultiplayerListeners(socket, playerName) {
   socket.on("joinedRoom", (roomData) => {
-    console.log(`Joined room: ${roomData.roomId}`);
-    const queryParams = new URLSearchParams({
-       matchId: roomData.roomId ,
+    
+   
 
-    });
-  
-    // Generate new URL with query parameters
-    const newUrl = `${window.location.href}?${queryParams.toString()}`;
-    history.pushState(null, null, newUrl);
     currentRoom = roomData.roomId;
+    console.error(currentRoom);
   });
 
   socket.on("playerConnected", (players) => {
-    console.log("Players:", players);
+   
     if (players.length === 2) {
       startCapture();
       
@@ -31,9 +26,9 @@ function setupMultiplayerListeners(socket, playerName) {
     }
     
     async function startSreenshare() {
-        console.log("Before delay");
+   
         await delay(10000); // Wait for 10 seconds
-        console.log("After delay");
+       
         let loadingMsg = select("#loadingMsg");
         if (loadingMsg) loadingMsg.remove();
         cnv.style("display", "block");
@@ -42,7 +37,7 @@ function setupMultiplayerListeners(socket, playerName) {
         isPlay = true;
         score = 0;
         opponentScore = 0;
-        lives = 3;
+        lives = 25;
         gameEnded = false;
         loop();
         let delayedbox= document.getElementById("delayed-box");
@@ -64,13 +59,13 @@ function setupMultiplayerListeners(socket, playerName) {
   });
 
   socket.on("updateOpponentState", (data) => {
-    console.error('Opponent state is',data)
+    
 
     updateOpponentState(data);
   });
 
   socket.on("updateScores", (scores) => {
-    console.log("Scores:", scores);
+  
     if (scores[playerName] !== undefined) {
       score = scores[playerName];
     }
@@ -87,12 +82,15 @@ function setupMultiplayerListeners(socket, playerName) {
     if (!gameEnded && data.roomId === currentRoom) {
       gameEnded = true;
      
-      console.error("data is" ,JSON.stringify(data));
-      if (score > opponentScore) {
+      if (score > opponentState.score) { 
+        
         showGameOverAlert('You won!', 'Congratulations!', 'success');
-      } else {
+      } else if (score < opponentState.score) {
         showGameOverAlert('You lost!', 'Game Over', 'error');
+      } else {
+        showGameOverAlert('It\'s a tie!', 'The game ended in a tie.', 'warning');
       }
+      
     }
   });
 
@@ -127,7 +125,7 @@ function showGameOverAlert(title, text, icon) {
     html: `
       ${text}<br><br>
       Your score: ${score}<br>
-      Opponent's score: ${opponentScore}
+      Opponent's score: ${opponentState.score}
 
     `,
     icon: icon,
@@ -138,68 +136,20 @@ function showGameOverAlert(title, text, icon) {
   });
 }
 
+
 function startMultiplayer() {
-  document.getElementById("multiplayerBtn").style.display = "none";
-  document.getElementById("singleplayerBtn").style.display = "none";
-  // Create query parameters
-  // const queryParams = new URLSearchParams({
-  //   token: 'secret',
-  //   returnURL: 'mybackend.com/api/results',
-  //   player1Id: 'a99zyx',
-  // });
+  
+  
+
+  socket = io();
+  socket.emit("joinRoom", playerName);
+  showSearchingState();
 
 
-  const queryParams = new URLSearchParams({
-    token: 'secret',
-    returnURL: 'mybackend.com/api/results',
-    player1Id: 'zyx',
-  });
 
-  // Generate new URL with query parameters
-  const newUrl = `${window.location.href}?${queryParams.toString()}`;
-  history.pushState(null, null, newUrl);
-
-
-  document.getElementById("multiplayerBtn").style.display = "none";
-  document.getElementById("singleplayerBtn").style.display = "none";
-
-
-  // const queryParams = new URLSearchParams({
-  //   token: 'secret',
-  //   returnURL: 'mybackend.com/api/results',
-  //   player1Id: 'zyx',
-  // });
-
-  // // Generate new URL with query parameters
-  // const newUrl = `${window.location.href}?${queryParams.toString()}`;
-  // history.pushState(null, null, newUrl);
-
-
-  // document.getElementById("multiplayerBtn").style.display = "none";
-  // document.getElementById("singleplayerBtn").style.display = "none";
-
-  Swal.fire({
-    title: 'Enter your name',
-    input: 'text',
-    inputPlaceholder: 'Your name',
-    showCancelButton: true,
-    inputValidator: (value) => {
-      if (!value) {
-        return 'You need to enter a name!'
-      }
-    }
-  }).then((result) => {
-    if (result.isConfirmed) {
-      playerName = result.value;
-      socket = io();
-      socket.emit("joinRoom", playerName);
-      showSearchingState();
+ 
+  
       // setupMultiplayerListeners(socket, playerName);
       // loop();
-    } else {
-      // If the user cancels, show the buttons again
-      document.getElementById("multiplayerBtn").style.display = "block";
-      document.getElementById("singleplayerBtn").style.display = "block";
-    }
-  });
-}
+  
+  };

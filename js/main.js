@@ -92,51 +92,15 @@ function setup() {
   showGameModePopup(); // Show the popup when the game starts
 
   // Create singleplayer button
-  let singleplayerBtn = createButton("");
-  singleplayerBtn.id("singleplayerBtn");
-
-  singleplayerBtn.style("background", "url(images/Start_icon.png) no-repeat center");
-
-  singleplayerBtn.style("background-size", "contain");
-  singleplayerBtn.style("border", "none");
-  singleplayerBtn.style("padding", "0");
-  singleplayerBtn.style("cursor", "pointer");
-  singleplayerBtn.mousePressed(startSingleplayer);
+ 
 
   // Responsive positioning and sizing
-  singleplayerBtn.style("position", "fixed");
-  singleplayerBtn.style("right", "10px");
-  singleplayerBtn.style("bottom", "20px");
 
-  // Base size for most screens
-  singleplayerBtn.style("width", "clamp(100px, 20vw, 400px)");
-  singleplayerBtn.style("height", "clamp(100px, 20vw, 400px)");
 
   // Adjust size for larger screens
 
-  // Create multiplayer button
-  let multiplayerBtn = createButton("");
-  multiplayerBtn.id("multiplayerBtn");
-  // multiplayerBtn.position(300, 150);
-  // multiplayerBtn.size(500, 500);
-  multiplayerBtn.style(
-    "background",
-    "url(images/Multiplayer_Icon.png) no-repeat center"
-  );
-  multiplayerBtn.style("background-size", "contain");
-  multiplayerBtn.style("background-size", "contain");
-  multiplayerBtn.style("border", "none");
-  multiplayerBtn.style("padding", "0");
-  multiplayerBtn.style("cursor", "pointer");
+ 
 
-  // Responsive positioning and sizing
-  multiplayerBtn.style("position", "fixed");
-  multiplayerBtn.style("left", "10px");
-  multiplayerBtn.style("bottom", "20px");
-  multiplayerBtn.style("width", "clamp(100px, 20vw, 400px)");
-  multiplayerBtn.style("height", "clamp(100px, 20vw, 400px)");
-
-  multiplayerBtn.mousePressed(startMultiplayer);
 }
 
 function draw() {
@@ -178,42 +142,39 @@ function showGameModePopup() {
   //     .getElementById("multiplayerBtn")
   //     .addEventListener("click", startMultiplayer);
 }
+window.addEventListener("DOMContentLoaded", () => {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const player1Id = urlParams.get('player1Id');
+  const player2Id = urlParams.get('player2Id');
+  const matchId = urlParams.get('matchId');
+
+  if (!(player1Id && player2Id && matchId)) {
+    console.error("params not defined for player1");
+    return;
+  }
+  if (player1Id.startsWith('a99') || player1Id.startsWith('b99')) {
+
+
+    startBotGame(true);
+    return;
+
+  }
+  else {
+  
+    
+startMultiplayer();
+    loop();
+  }
+
+
+})
 
 function showSearchingState() {
   // Hide the game canvas
-  cnv.style("display", "none");
-  const queryString = window.location.search;
-
-  // Create a loading message
-  let loadingMsg = createP("Searching for a player...");
-  loadingMsg.id("loadingMsg");
-  loadingMsg.style("text-align", "center");
-  loadingMsg.style("font-size", "clamp(24px, 5vw, 36px)");
-  loadingMsg.style("margin-top", "50px");
-  loadingMsg.style("color", "white");
-  loadingMsg.style("font-weight", "bold");
-
-  const urlParams = new URLSearchParams(queryString);
-  const player1Id = urlParams.get('player1Id');
-
-  if (player1Id.startsWith('a99') || player1Id.startsWith('b99')) {
-    // alert()
-    loadingMsg.remove();
-    startBotGame(true);
-    return;
-     // Stop further execution
-  } 
-
-  // Initialize the socket and set up multiplayer listeners
-  else{
-    setupMultiplayerListeners(socket, playerName);
-    loop();} 
-
-  // Create a timer
-
-  // let timerInterval = setTimeout(() => {
-  //     showPlayWithBothSuggestion();
-  // }, 5000);
+ 
+  setupMultiplayerListeners(socket, playerName);
+  loop();
 }
 
 function check() {
@@ -667,11 +628,11 @@ function gameOver(winner) {
   if (isPlayWithBot) {
     let title, text, icon;
 
-    if (winner === "bot") {
+    if (botscore > score) {
       title = "Game Over!";
       text = "Opponent Won the game";
       icon = "info";
-    } else if (winner === "player") {
+    } else  {
       title = "Congratulations!";
       text = "You Won the game";
       icon = "success";

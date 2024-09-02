@@ -50,7 +50,7 @@ function showPlayWithBothSuggestion() {
     });
   }else{
   
-    console.log("Loading msg not found");
+  
     startBotGame(true);
   }
   // If loadingMsg doesn't exist, the function will do nothing

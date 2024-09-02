@@ -37,7 +37,7 @@ function gameLoop(roomId) {
   lives: gameState.lives[socketId],
       });
 
-      console.log('Oppoennt score is',gameState.scores[socketId])
+     
     }
   });
 }
@@ -129,7 +129,7 @@ io.on("connection", (socket) => {
     if (currentRoom) {
       io.to(currentRoom).emit("gameOver", {
         roomId: currentRoom,
-        loser: data.loser
+        // loser: data.loser
       });
     }
   });
@@ -138,7 +138,7 @@ io.on("connection", (socket) => {
     const gameState = rooms.get(currentRoom);
     if (gameState) {
       gameState.scores[socket.id] = data.score;
-      console.log(`Updated score for ${socket.id}: ${data.score}`);
+
     }
   });
 
