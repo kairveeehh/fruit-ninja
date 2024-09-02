@@ -37,7 +37,7 @@ function setupMultiplayerListeners(socket, playerName) {
         isPlay = true;
         score = 0;
         opponentScore = 0;
-        lives = 25;
+        lives = 26;
         gameEnded = false;
         loop();
         let delayedbox= document.getElementById("delayed-box");

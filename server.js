@@ -7,10 +7,6 @@ app.use(express.static("./"));
 
 const rooms = new Map();
 
-function generateRoomId() {
-  return Math.random().toString(36).substring(2, 15);
-}
-
 function createGameState() {
   return {
     fruits: [],
@@ -18,7 +14,7 @@ function createGameState() {
     lives: {},
     swordX: {},
     swordY: {},
-    players: new Map()
+    players: new Map(),
   };
 }
 
@@ -31,70 +27,55 @@ function gameLoop(roomId) {
     if (opponentId) {
       io.to(opponentId).emit("updateOpponentState", {
         swordX: gameState.swordX[socketId],
-  swordY: gameState.swordY[socketId],
-  fruits: gameState.fruits[socketId],
-  score: gameState.scores[socketId],
-  lives: gameState.lives[socketId],
+        swordY: gameState.swordY[socketId],
+        fruits: gameState.fruits[socketId],
+        score: gameState.scores[socketId],
+        lives: gameState.lives[socketId],
       });
-
-     
     }
   });
 }
 
 io.on("connection", (socket) => {
   console.log("A user connected");
-  let currentRoom = null;
 
-  socket.on("joinRoom", (playerName) => {
-    let roomToJoin = null;
+  // Fetch the matchId and playerName from query params
+  const { matchId, playerName } = socket.handshake.query;
+  let currentRoom = matchId; // Use matchId as the room name
 
-    // Find a room with only one player or create a new room
-    for (const [roomId, gameState] of rooms) {
-      if (gameState.players.size === 1) {
-        roomToJoin = roomId;
-        break;
-      }
-    }
+  if (!rooms.has(currentRoom)) {
+    rooms.set(currentRoom, createGameState());
+  }
 
-    if (!roomToJoin) {
-      roomToJoin = generateRoomId();
-      rooms.set(roomToJoin, createGameState());
-    }
+  socket.join(currentRoom);
 
-    currentRoom = roomToJoin;
-    socket.join(currentRoom);
+  const gameState = rooms.get(currentRoom);
+  gameState.players.set(socket.id, playerName);
+  gameState.scores[socket.id] = 0;
+  gameState.lives[socket.id] = 26;
+  gameState.swordX[socket.id] = 0;
+  gameState.swordY[socket.id] = 0;
+  gameState.fruits[socket.id] = [];
 
-    const gameState = rooms.get(currentRoom);
-    gameState.players.set(socket.id, playerName);
-    gameState.scores[socket.id] = 0;
-    gameState.lives[socket.id] = 3;
-    gameState.swordX[socket.id] = 0;
-    gameState.swordY[socket.id] = 0;
-    gameState.fruits[socket.id] = [];
+  socket.emit("joinedRoom", { roomId: currentRoom });
+  io.to(currentRoom).emit("playerConnected", Array.from(gameState.players.values()));
 
-    socket.emit("joinedRoom", { roomId: currentRoom });
-    io.to(currentRoom).emit("playerConnected", Array.from(gameState.players.values()));
-
-    if (gameState.players.size === 2) {
-      io.to(currentRoom).emit("startGame");
-      setInterval(() => gameLoop(currentRoom), 1000 / 60); // 60 FPS
-    }
-  });
+  // Start the game only if there are exactly 2 players in the same room (matchId)
+  if (gameState.players.size === 2) {
+    io.to(currentRoom).emit("startGame");
+    setInterval(() => gameLoop(currentRoom), 1000 / 60); // 60 FPS
+  }
 
   socket.on("updateOpponentData", (data) => {
-    if (!currentRoom) return;
-    const gameState = rooms.get(currentRoom);
-    const opponentId = Array.from(gameState.players.keys()).find(
-      (id) => id !== socket.id
-    );
+    const opponentId = Array.from(gameState.players.keys()).find((id) => id !== socket.id);
     if (opponentId) {
       io.to(opponentId).emit("updateOpponentState", data);
     }
   });
-
+ 
   socket.on("disconnect", () => {
     console.log("A player disconnected");
+
     if (!currentRoom) return;
 
     const gameState = rooms.get(currentRoom);
@@ -102,7 +83,7 @@ io.on("connection", (socket) => {
 
     io.to(currentRoom).emit("playerDisconnected", {
       roomId: currentRoom,
-      disconnectedPlayerName: gameState.players.get(socket.id)
+      disconnectedPlayerName: gameState.players.get(socket.id),
     });
 
     gameState.players.delete(socket.id);
@@ -116,7 +97,7 @@ io.on("connection", (socket) => {
       const winningPlayerName = Array.from(gameState.players.values())[0];
       io.to(currentRoom).emit("gameOver", {
         roomId: currentRoom,
-        winner: winningPlayerName
+        winner: winningPlayerName,
       });
     } else if (gameState.players.size === 0) {
       rooms.delete(currentRoom);
@@ -129,16 +110,15 @@ io.on("connection", (socket) => {
     if (currentRoom) {
       io.to(currentRoom).emit("gameOver", {
         roomId: currentRoom,
-        // loser: data.loser
       });
     }
   });
+
   socket.on("updateScore", (data) => {
     if (!currentRoom) return;
     const gameState = rooms.get(currentRoom);
     if (gameState) {
       gameState.scores[socket.id] = data.score;
-
     }
   });
 

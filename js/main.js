@@ -239,12 +239,17 @@ function game() {
   drawScore(score);
   drawLives(lives);
   if (isMultiplayer) {
+    push();
+    translate(0, 0);
+    fill(0, 0, 255); // Blue background
+    rect(800 / 2 - 200, 15, 400, 80); // Draw a blue box
+    fill(255, 255, 255); // White text
     cnv.textSize(32);
     cnv.textStyle(BOLD);
-    cnv.fill(0, 0, 255);
     cnv.textAlign(CENTER);
-    cnv.text("Oponent Score: " + opponentState.score, 800 / 2, 30);
-    cnv.text("Oponent Lives: " + opponentState.lives, 800 / 2, 60);
+    cnv.text("Opponent Score: " + opponentState.score, 800 / 2, 30);
+    cnv.text("Opponent Lives: " + opponentState.lives, 800 / 2, 60);
+    pop();
   }
 
   if (isMultiplayer) {
@@ -681,7 +686,7 @@ function gameOver(winner) {
 function resetGameState() {
   // Reset all game variables here
   score = 0;
-  lives = 25;
+  lives = 26;
   fruit = [];
   // ... reset any other necessary variables
 
