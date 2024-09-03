@@ -50,18 +50,18 @@ io.on("connection", (socket) => {
     let roomToJoin = roomId;
 
     // If no roomId is provided, find a room with only one player or create a new room
-    if (!roomToJoin) {
-      for (const [existingRoomId, gameState] of rooms) {
-        if (gameState.players.size === 1) {
-          roomToJoin = existingRoomId;
-          break;
-        }
-      }
+    // if (!roomToJoin) {
+    //   for (const [existingRoomId, gameState] of rooms) {
+    //     if (gameState.players.size === 1) {
+    //       roomToJoin = existingRoomId;
+    //       break;
+    //     }
+    //   }
 
-      if (!roomToJoin) {
-        roomToJoin = generateRoomId();
-      }
-    }
+    //   if (!roomToJoin) {
+    //     roomToJoin = generateRoomId();
+    //   }
+    // }
 
     // If the room doesn't exist, create it
     if (!rooms.has(roomToJoin)) {
@@ -87,6 +87,7 @@ io.on("connection", (socket) => {
     gameState.fruits[socket.id] = [];
 
     socket.emit("joinedRoom", { roomId: currentRoom });
+    console.log(roomId)
     io.to(currentRoom).emit(
       "playerConnected",
       Array.from(gameState.players.values())

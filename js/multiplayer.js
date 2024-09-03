@@ -134,7 +134,15 @@ function showGameOverAlert(title, text, icon) {
 function startMultiplayer() {
   socket = io();
   // Frontend code
-  socket.emit("joinRoom", { playerName: "PlayerName", roomId: "CustomRoomId" });
+
+  const queryString = window.location.search;
+
+
+  const urlParams = new URLSearchParams(queryString);
+
+  const matchId = urlParams.get('matchId');
+
+  socket.emit("joinRoom", { playerName: "PlayerName", roomId: matchId });
   showSearchingState();
 
   // setupMultiplayerListeners(socket, playerName);
