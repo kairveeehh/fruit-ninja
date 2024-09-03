@@ -39,15 +39,15 @@ function setupMultiplayerListeners(socket, playerName) {
         gameEnded = false;
         loop();
         let delayedbox = document.getElementById("delayed-box");
-        delayedbox.style.position = "absolute";
+     
         delayedbox.style.top = "50%";
         delayedbox.style.right = "0";
         delayedbox.style.transform = "translateY(-50%)";
-        delayedbox.style.width = "200px";
-        delayedbox.style.height = "200px";
-        delayedbox.style.backgroundColor = "#f0f0f0";
+        delayedbox.style.width = "0px";
+        delayedbox.style.height = "0px";
+
         delayedbox.style.border = "1px solid #ccc";
-        delayedbox.style.padding = "20px";
+        
       }
 
       startSreenshare();

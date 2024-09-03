@@ -238,19 +238,36 @@ function game() {
   score += points;
   drawScore(score);
   drawLives(lives);
-  if (isMultiplayer) {
-    push();
-    translate(0, 0);
-    fill(0, 0, 255); // Blue background
-    rect(800 / 2 - 200, 15, 400, 80); // Draw a blue box
-    fill(255, 255, 255); // White text
-    cnv.textSize(32);
-    cnv.textStyle(BOLD);
-    cnv.textAlign(CENTER);
-    cnv.text("Opponent Score: " + opponentState.score, 800 / 2, 30);
-    cnv.text("Opponent Lives: " + opponentState.lives, 800 / 2, 60);
-    pop();
-  }
+
+    if (isMultiplayer) {
+      push();
+      translate(0, 0);
+      
+      // Enhanced Box with Gradient and Rounded Corners
+      let gradient = drawingContext.createLinearGradient(0, 0, 0, 100);
+      gradient.addColorStop(0, 'rgb(0, 0, 200)'); // Top color
+      gradient.addColorStop(1, 'rgb(0, 0, 150)'); // Bottom color
+      drawingContext.fillStyle = gradient;
+      
+      fill(0, 0, 255); // Blue background with gradient
+      stroke(255); // White border
+      strokeWeight(2); // Border weight
+      rect(800 / 2 - 220, 15, 440, 120, 20); // Draw a blue box with rounded corners
+      
+      // Text for Opponent Score
+      fill(255); // White text
+      noStroke(); // No border for text
+      textSize(32);
+      textStyle(BOLD);
+      textAlign(CENTER, CENTER);
+      text("Opponent Score: " + opponentState.score, 800 / 2, 40); // Position score text
+    
+      // Text for Opponent Lives
+      text("Opponent Lives: " + opponentState.lives, 800 / 2, 80); // Position lives text
+    
+      pop();
+    }
+  
 
   if (isMultiplayer) {
     socket.emit("updateScore", { score: score });
@@ -304,13 +321,20 @@ function game() {
   
         spectateBtn.addEventListener("click", () => {
           isSpectating = !isSpectating;
-          if (isSpectating) {
-            spectateBtn.innerText = "Return";
-            document.getElementById("defaultCanvas0").style.border = "none";
-          } else {
-            spectateBtn.innerText = "Spectate";
-            document.getElementById("defaultCanvas0").style.border = "none";
-          }
+if (isSpectating) {
+  spectateBtn.innerText = "Return";
+  let box = document.getElementById('delayed-box');
+  box.style.width = "100%";
+  box.style.height = "100%";
+  box.style.position = "absolute";
+  box.style.display = "block"; // Ensure the box is visible
+} else {
+  spectateBtn.innerText = "Spectate";
+  let box = document.getElementById('delayed-box');
+  box.style.display = "none"; // Hide the box properly
+  document.getElementById("defaultCanvas0").style.border = "none";
+}
+
         });}
 
 
