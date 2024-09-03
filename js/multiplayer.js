@@ -3,32 +3,30 @@ let gameEnded = false;
 let opponentScore = 0;
 let currentRoom = null;
 
-
 function setupMultiplayerListeners(socket, playerName) {
   socket.on("joinedRoom", (roomData) => {
-    
-   
-
     currentRoom = roomData.roomId;
     console.error(currentRoom);
   });
 
+  socket.on('roomFull', ({ roomId }) => {
+    alert(`Room ${roomId} is full. Please try another room.`);
+    // Handle this scenario in your UI
+  });
+
   socket.on("playerConnected", (players) => {
-   
     if (players.length === 2) {
       startCapture();
-      
 
       function delay(ms) {
-        return new Promise(resolve => {
-            setTimeout(resolve, ms);
+        return new Promise((resolve) => {
+          setTimeout(resolve, ms);
         });
-    }
-    
-    async function startSreenshare() {
-   
+      }
+
+      async function startSreenshare() {
         await delay(10000); // Wait for 10 seconds
-       
+
         let loadingMsg = select("#loadingMsg");
         if (loadingMsg) loadingMsg.remove();
         cnv.style("display", "block");
@@ -40,7 +38,7 @@ function setupMultiplayerListeners(socket, playerName) {
         lives = 26;
         gameEnded = false;
         loop();
-        let delayedbox= document.getElementById("delayed-box");
+        let delayedbox = document.getElementById("delayed-box");
         delayedbox.style.position = "absolute";
         delayedbox.style.top = "50%";
         delayedbox.style.right = "0";
@@ -50,29 +48,24 @@ function setupMultiplayerListeners(socket, playerName) {
         delayedbox.style.backgroundColor = "#f0f0f0";
         delayedbox.style.border = "1px solid #ccc";
         delayedbox.style.padding = "20px";
-    }
-    
-    startSreenshare();
+      }
 
-     
+      startSreenshare();
     }
   });
 
   socket.on("updateOpponentState", (data) => {
-    
-
     updateOpponentState(data);
   });
 
   socket.on("updateScores", (scores) => {
-  
     if (scores[playerName] !== undefined) {
       score = scores[playerName];
     }
     for (let player in scores) {
       if (player !== playerName) {
         opponentScore = scores[player];
-        
+
         break;
       }
     }
@@ -81,21 +74,19 @@ function setupMultiplayerListeners(socket, playerName) {
   socket.on("gameOver", (data) => {
     if (!gameEnded && data.roomId === currentRoom) {
       gameEnded = true;
-     
-      if (score > opponentState.score) { 
-        
-        showGameOverAlert('You won!', 'Congratulations!', 'success');
+
+      if (score > opponentState.score) {
+        showGameOverAlert("You won!", "Congratulations!", "success");
       } else if (score < opponentState.score) {
-        showGameOverAlert('You lost!', 'Game Over', 'error');
+        showGameOverAlert("You lost!", "Game Over", "error");
       } else {
-        showGameOverAlert('It\'s a tie!', 'The game ended in a tie.', 'warning');
+        showGameOverAlert("It's a tie!", "The game ended in a tie.", "warning");
       }
-      
     }
   });
 
   socket.on("disconnect", () => {
-    socket.emit("playerDisconnected", {playerName, roomId: currentRoom});
+    socket.emit("playerDisconnected", { playerName, roomId: currentRoom });
   });
 
   socket.on("playerDisconnected", (data) => {
@@ -103,13 +94,17 @@ function setupMultiplayerListeners(socket, playerName) {
       gameEnded = true;
       gameOver();
       if (data.disconnectedPlayerName !== playerName) {
-        showGameOverAlert('You won!', 'The other player has disconnected.', 'success');
+        showGameOverAlert(
+          "You won!",
+          "The other player has disconnected.",
+          "success"
+        );
       }
     }
   });
 
   socket.on("roomClosed", () => {
-    showGameOverAlert('Room Closed', 'The game room has been closed.', 'info');
+    showGameOverAlert("Room Closed", "The game room has been closed.", "info");
   });
 }
 
@@ -117,7 +112,6 @@ function updateScore(newScore) {
   score = newScore;
   socket.emit("updateScore", { score: newScore });
 }
-
 
 function showGameOverAlert(title, text, icon) {
   Swal.fire({
@@ -129,27 +123,20 @@ function showGameOverAlert(title, text, icon) {
 
     `,
     icon: icon,
-    confirmButtonText: 'Play Again'
+    confirmButtonText: "Play Again",
   }).then((result) => {
     if (result.isConfirmed) {
-      startMultiplayer();    }
+      startMultiplayer();
+    }
   });
 }
 
-
 function startMultiplayer() {
-  
-  
-
   socket = io();
-  socket.emit("joinRoom", playerName);
+  // Frontend code
+  socket.emit("joinRoom", { playerName: "PlayerName", roomId: "CustomRoomId" });
   showSearchingState();
 
-
-
- 
-  
-      // setupMultiplayerListeners(socket, playerName);
-      // loop();
-  
-  };
+  // setupMultiplayerListeners(socket, playerName);
+  // loop();
+}

@@ -7,6 +7,10 @@ app.use(express.static("./"));
 
 const rooms = new Map();
 
+function generateRoomId() {
+  return Math.random().toString(36).substring(2, 15);
+}
+
 function createGameState() {
   return {
     fruits: [],
@@ -23,7 +27,9 @@ function gameLoop(roomId) {
   if (!gameState) return;
 
   gameState.players.forEach((playerName, socketId) => {
-    const opponentId = Array.from(gameState.players.keys()).find((id) => id !== socketId);
+    const opponentId = Array.from(gameState.players.keys()).find(
+      (id) => id !== socketId
+    );
     if (opponentId) {
       io.to(opponentId).emit("updateOpponentState", {
         swordX: gameState.swordX[socketId],
@@ -38,44 +44,73 @@ function gameLoop(roomId) {
 
 io.on("connection", (socket) => {
   console.log("A user connected");
+  let currentRoom = null;
 
-  // Fetch the matchId and playerName from query params
-  const { matchId, playerName } = socket.handshake.query;
-  let currentRoom = matchId; // Use matchId as the room name
+  socket.on("joinRoom", ({ playerName, roomId }) => {
+    let roomToJoin = roomId;
 
-  if (!rooms.has(currentRoom)) {
-    rooms.set(currentRoom, createGameState());
-  }
+    // If no roomId is provided, find a room with only one player or create a new room
+    if (!roomToJoin) {
+      for (const [existingRoomId, gameState] of rooms) {
+        if (gameState.players.size === 1) {
+          roomToJoin = existingRoomId;
+          break;
+        }
+      }
 
-  socket.join(currentRoom);
+      if (!roomToJoin) {
+        roomToJoin = generateRoomId();
+      }
+    }
 
-  const gameState = rooms.get(currentRoom);
-  gameState.players.set(socket.id, playerName);
-  gameState.scores[socket.id] = 0;
-  gameState.lives[socket.id] = 26;
-  gameState.swordX[socket.id] = 0;
-  gameState.swordY[socket.id] = 0;
-  gameState.fruits[socket.id] = [];
+    // If the room doesn't exist, create it
+    if (!rooms.has(roomToJoin)) {
+      rooms.set(roomToJoin, createGameState());
+    }
 
-  socket.emit("joinedRoom", { roomId: currentRoom });
-  io.to(currentRoom).emit("playerConnected", Array.from(gameState.players.values()));
+    const gameState = rooms.get(roomToJoin);
 
-  // Start the game only if there are exactly 2 players in the same room (matchId)
-  if (gameState.players.size === 2) {
-    io.to(currentRoom).emit("startGame");
-    setInterval(() => gameLoop(currentRoom), 1000 / 60); // 60 FPS
-  }
+    // Check if the room is full
+    if (gameState.players.size >= 2) {
+      socket.emit("roomFull", { roomId: roomToJoin });
+      return;
+    }
+
+    currentRoom = roomToJoin;
+    socket.join(currentRoom);
+
+    gameState.players.set(socket.id, playerName);
+    gameState.scores[socket.id] = 0;
+    gameState.lives[socket.id] = 3;
+    gameState.swordX[socket.id] = 0;
+    gameState.swordY[socket.id] = 0;
+    gameState.fruits[socket.id] = [];
+
+    socket.emit("joinedRoom", { roomId: currentRoom });
+    io.to(currentRoom).emit(
+      "playerConnected",
+      Array.from(gameState.players.values())
+    );
+
+    if (gameState.players.size === 2) {
+      io.to(currentRoom).emit("startGame");
+      setInterval(() => gameLoop(currentRoom), 1000 / 60); // 60 FPS
+    }
+  });
 
   socket.on("updateOpponentData", (data) => {
-    const opponentId = Array.from(gameState.players.keys()).find((id) => id !== socket.id);
+    if (!currentRoom) return;
+    const gameState = rooms.get(currentRoom);
+    const opponentId = Array.from(gameState.players.keys()).find(
+      (id) => id !== socket.id
+    );
     if (opponentId) {
       io.to(opponentId).emit("updateOpponentState", data);
     }
   });
- 
+
   socket.on("disconnect", () => {
     console.log("A player disconnected");
-
     if (!currentRoom) return;
 
     const gameState = rooms.get(currentRoom);
@@ -110,6 +145,7 @@ io.on("connection", (socket) => {
     if (currentRoom) {
       io.to(currentRoom).emit("gameOver", {
         roomId: currentRoom,
+        // loser: data.loser
       });
     }
   });
