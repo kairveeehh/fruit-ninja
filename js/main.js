@@ -42,7 +42,7 @@ let opponentState = {
   swordY: 0,
   fruits: [],
   score: 0,
-  lives: 26,
+  lives: 3,
 };
 let socket;
 
@@ -88,7 +88,7 @@ function setup() {
   sword = new Sword(color("#FFFFFF"));
   frameRate(60);
   score = 0;
-  lives = 26;
+  lives = 3;
   showGameModePopup(); // Show the popup when the game starts
 
   // Create singleplayer button
@@ -711,7 +711,7 @@ function gameOver(winner) {
 function resetGameState() {
   // Reset all game variables here
   score = 0;
-  lives = 26;
+  lives = 3;
   fruit = [];
   // ... reset any other necessary variables
 
