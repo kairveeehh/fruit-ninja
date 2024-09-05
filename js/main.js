@@ -248,18 +248,19 @@ function game() {
       gradient.addColorStop(0, 'rgb(0, 0, 200)'); // Top color
       gradient.addColorStop(1, 'rgb(0, 0, 150)'); // Bottom color
       drawingContext.fillStyle = gradient;
-      
-      fill(0, 0, 255); // Blue background with gradient
-      stroke(255); // White border
-      strokeWeight(2); // Border weight
-      rect(800 / 2 - 220, 15, 440, 120, 20); // Draw a blue box with rounded corners
-      
-      // Text for Opponent Score
-      fill(255); // White text
-      noStroke(); // No border for text
-      textSize(32);
-      textStyle(BOLD);
-      textAlign(CENTER, CENTER);
+    // Modified Background Style
+fill(195, 175, 145, 179); // C3AF91 color with 70% opacity
+stroke(255); // White border
+strokeWeight(2); // Border weight
+rect(800 / 2 - 220, 15, 440, 120, 20); // Draw a box with rounded corners
+
+// Modified Text Style for Opponent Score
+fill(0, 0, 0, 209); // 000000 color with 82% opacity
+noStroke(); // No border for text
+textSize(32);
+textStyle(BOLD);
+textAlign(CENTER, CENTER);
+
       text("Opponent Score: " + opponentState.score, 800 / 2, 40); // Position score text
     
       // Text for Opponent Lives
